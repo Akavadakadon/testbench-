@@ -1,0 +1,12 @@
+FROM nginx
+
+RUN apt-get -yqq update \
+    && apt-get install -yqq iproute2 \
+  tcpdump \
+  net-tools \
+  iputils-ping \
+  python3 \
+  nano \
+  python3-pip
+  
+RUN pip install requests

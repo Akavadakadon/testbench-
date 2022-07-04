@@ -1,0 +1,92 @@
+version: '3'
+
+services:
+  server:
+    image: quiccc/srv:latest
+    build:
+      dockerfile: ./Dockerfile-server
+      context: .
+    stdin_open: true
+    tty: true
+    networks:
+      ext:
+        ipv4_address: 10.1.1.103
+      server:
+        ipv4_address: 192.168.44.101
+    expose:
+      - "6121/udp"
+    ports:
+      - "6121:6121/udp"
+    cap_add:
+      - NET_ADMIN
+    depends_on:
+      - ns3-box
+
+  client:
+    image: quiccc/cli:latest
+    build:
+      dockerfile: ./Dockerfile-client
+      context: .
+    stdin_open: true
+    tty: true
+    networks:
+      ext:
+        ipv4_address: 10.1.1.101
+      client:
+        ipv4_address: 192.168.42.101
+    cap_add:
+      - NET_ADMIN
+    depends_on:
+      - ns3-box
+      - server
+    volumes:
+      - ./out_files:/tmp/out_files
+    env_file: .env
+
+  ns3-box:
+    image: ns3-box:latest
+    build:
+      dockerfile: ./Dockerfile-ns3
+      context: .
+    env_file: .env
+    stdin_open: true
+    tty: true
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    volumes:
+      - ./out_dumps:/ns3/dumps
+    networks:
+      ext:
+        ipv4_address: 10.1.1.104
+      client:
+      server:
+
+networks:
+  ext:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.1.1.0/24
+#    driver_opts:
+#      com.docker.network.bridge.name: br_ext
+    enable_ipv6: false
+  client:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.42.0/24
+#    driver_opts:
+#      com.docker.network.bridge.name: br_sim1
+    enable_ipv6: false
+  server:
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.44.0/24
+#    driver_opts:
+#      com.docker.network.bridge.name: br_sim2
+    enable_ipv6: false

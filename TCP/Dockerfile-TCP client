@@ -1,0 +1,8 @@
+FROM tcp/clisrv
+
+RUN mkdir /result
+COPY utils/ns3client_rquic.sh /tmp/
+COPY inf.py /tmp/
+#RUN cat /proc/sys/net/ipv4/tcp_congestion_control
+RUN cat /proc/sys/net/ipv4/tcp_congestion_control
+CMD sh /tmp/ns3client_rquic.sh; python3 -u /tmp/inf.py

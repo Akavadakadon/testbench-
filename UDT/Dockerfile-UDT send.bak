@@ -1,0 +1,9 @@
+FROM udt/clisrv
+
+RUN mkdir res
+COPY utils/ns3server_rquic.sh /tmp/
+COPY quic_generate_custom_response.py /tmp/
+COPY inf1.py /tmp/
+
+CMD sh /tmp/ns3server_rquic.sh; python3 /tmp/quic_generate_custom_response.py; /app/appserver > a.txt
+#CMD sh /tmp/ns3server_rquic.sh; python3 /tmp/quic_generate_custom_response.py; python3 /tmp/inf1.py 

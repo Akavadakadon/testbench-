@@ -1,0 +1,43 @@
+FROM ubuntu:20.04 AS builder
+
+RUN apt-get update && \
+  DEBIAN_FRONTEND=noninteractive apt-get install -y \
+  python3 \
+  build-essential \
+  cmake \
+  wget \
+  net-tools \
+  iptables \
+  uml-utilities \
+  bridge-utils \
+  iputils-ping \
+  iproute2
+
+ENV VERS 3.32
+RUN wget https://www.nsnam.org/release/ns-allinone-$VERS.tar.bz2
+RUN tar xjf ns-allinone-$VERS.tar.bz2 && rm ns-allinone-$VERS.tar.bz2
+RUN mv /ns-allinone-$VERS/ns-$VERS /ns3
+
+WORKDIR /ns3
+
+COPY sim_csma_p2p_csma.cc scratch/
+
+#RUN mkdir out/
+#RUN ./waf configure --build-profile=release --out=out/
+RUN ./waf configure
+RUN ./waf build
+
+ENV DATA_RATE=1Gbps
+ENV P2P_DELAY=50ms
+ENV ERROR_RATE=0.001
+ENV ENABLE_PCAP=1
+ENV MIN_BURST_SIZE=1
+ENV MAX_BURST_SIZE=5
+
+RUN mkdir -p /ns3/dumps
+
+COPY ns3proxy.sh /tmp/
+COPY inf.py /tmp/
+#CMD sh /tmp/ns3proxy.sh; ./waf --run " tap-csma-virtual-machine-for-quic --errorRateVal=$ERROR_RATE --p2pDelay=$P2P_DELAY --enablePcap=$ENABLE_PCAP"
+#CMD python3 /tmp/inf.py
+CMD sh /tmp/ns3proxy.sh; ./waf --run "sim_csma_p2p_csma --er=$ERROR_RATE --owd=$P2P_DELAY --logPcap=$ENABLE_PCAP --dataRate=$DATA_RATE --minBurstSize=$MIN_BURST_SIZE --maxBurstSize=$MAX_BURST_SIZE"

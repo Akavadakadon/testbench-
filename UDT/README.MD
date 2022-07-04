@@ -1,0 +1,6 @@
+Приложения для тестирования UDT протокола
+Используются библиотеки UDTv4 с https://sourceforge.net/p/udt/git/ci/master/tree/udt4/
+appclient-принимает файл и appserver-отправляет файл
+Взаимодействие клиента и сервера такое же, как описано в рид ми в папке уровнем выше
+
+Перед сборкой не забыть export LD_LIBRARY_PATH=./src/:$LD_LIBRARY_PATH 

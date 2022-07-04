@@ -1,0 +1,99 @@
+ version: '3'
+
+
+services:
+  tcp_client:
+    image: tcp/cli:latest
+    env_file: .env
+    build:
+      dockerfile: ./Dockerfile-TCP client
+      context: .
+    sysctls:
+            - net.ipv4.tcp_congestion_control=reno
+            #- net.ipv4.tcp_congestion_control=cubic
+    networks:
+      ns3_ext:
+        ipv4_address: 10.1.1.101
+      ns3_client:
+        ipv4_address: 192.168.42.101
+    cap_add:
+      - NET_ADMIN
+    depends_on:
+      - ns3-box
+      - tcp_server
+    volumes:
+      - ./out_files:/result
+      
+  tcp_server:
+    image: tcp/serv:latest
+    build:
+      dockerfile: ./Dockerfile-TCP server
+      context: .
+    sysctls:
+            - net.ipv4.tcp_congestion_control=reno
+    networks:
+      ns3_ext:
+        ipv4_address: 10.1.1.103
+      ns3_server:
+        ipv4_address: 192.168.44.101
+    cap_add:
+      - NET_ADMIN
+    depends_on:
+      - ns3-box
+    volumes:
+    # вписать свое
+      - /mnt/d/TCP/certs:/etc/nginx/certs
+    ports:
+      - "80:80"
+      - "443:443"
+      
+  ns3-box:
+    image: ns3-box:latest
+    env_file: .env
+    stdin_open: true
+    tty: true
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    volumes:
+      - ./out_dumps:/ns3/dumps
+    networks:
+      ns3_ext:
+        ipv4_address: 10.1.1.104
+      ns3_client:
+      ns3_server:
+        ipv4_address: 192.168.44.102
+
+#
+# Если сети уже созданы
+#      
+#networks:
+#  ns3_ext:
+#    external: true    
+#  ns3_client:
+#    external: true    
+#  ns3_server:
+#    external: true 
+    
+networks:
+  ext:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.1.1.0/24
+    enable_ipv6: false
+  client:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.42.0/24
+    enable_ipv6: false
+  server:
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.44.0/24
+    enable_ipv6: false

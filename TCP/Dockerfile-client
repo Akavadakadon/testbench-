@@ -1,0 +1,11 @@
+ARG TAG=latest
+FROM quiccc/clisrv:${TAG}
+RUN apt-get update
+RUN apt-get install -y \
+  python3 \
+  iproute2
+COPY utils/ns3client_rquic.sh /tmp/
+COPY runner.py generate_custom_response.py count_ok_lines.sh /tmp/
+RUN mkdir /tmp/out_files
+CMD sh /tmp/ns3client_rquic.sh; python3 /tmp/runner.py
+# CMD sh /tmp/ns3client_rquic.sh; bash

@@ -1,0 +1,16 @@
+FROM ubuntu:20.04
+
+RUN apt-get -yqq update \
+    && apt-get install -yqq build-essential \
+  iproute2 \
+  tcpdump \
+  net-tools \
+  iputils-ping \
+  python3
+
+
+COPY src /src/
+COPY app /app/
+
+ENV LD_LIBRARY_PATH=/src 
+

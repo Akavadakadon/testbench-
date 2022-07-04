@@ -1,0 +1,16 @@
+FROM tcp/nginximg
+
+#RUN apt-get install -y iproute2 \
+   
+
+RUN mkdir res
+COPY utils/ns3server_rquic.sh /tmp/
+COPY generate_custom_response.py /tmp/
+COPY inf.py /tmp/
+COPY tcp.py /tmp/
+
+COPY ssl.conf /etc/nginx/conf.d
+COPY quic_generate_custom_response.py tmp
+
+CMD sh /tmp/ns3server_rquic.sh; nginx;  python3 tmp/generate_custom_response.py;  python3 -u /tmp/inf.py  s
+#run python tmp/quic_generate_custom_response.py

@@ -1,0 +1,7 @@
+FROM udt/clisrv
+
+RUN mkdir result
+COPY utils/ns3client_rquic.sh /tmp/
+COPY inf.py /tmp/
+
+CMD sh /tmp/ns3client_rquic.sh; python3 /tmp/inf.py 
